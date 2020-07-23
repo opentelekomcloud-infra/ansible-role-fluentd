@@ -1,0 +1,32 @@
+[Unit]
+Description=Fluentd Podman container
+Wants=syslog.service
+
+[Service]
+Type=simple
+Restart=always
+TimeoutSec=30s
+User=fluent
+Group=fluent
+Environment=FLUENTD_IMAGE=otcinfra/fluentd
+EnvironmentFile=/etc/fluentd/env
+
+ExecStartPre=-/usr/bin/podman system migrate
+ExecStartPre=-/usr/bin/podman rm "fluentd"
+ExecStartPre=-/usr/bin/podman pull ${FLUENTD_IMAGE}
+
+ExecStart=/bin/sh -c "/usr/bin/podman run \
+  --name fluentd \
+  --env-file /etc/fluentd/env \
+  -v /etc/fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro,z \
+  -v /var/log/journal:/var/log/journal:ro,z \
+  ${FLUENTD_IMAGE}"
+
+ExecReload=-/usr/bin/podman stop -t 300 "fluentd"
+ExecReload=-/usr/bin/podman rm "fluentd"
+
+ExecStop=/usr/bin/podman stop -t 300 "fluentd"
+ExecStop=/usr/bin/podman rm "fluentd"
+
+[Install]
+WantedBy=multi-user.target

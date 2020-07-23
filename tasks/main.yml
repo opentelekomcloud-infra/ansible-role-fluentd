@@ -1,0 +1,78 @@
+---
+# tasks file for fluentd
+
+- name: Load a variable file based on the OS type, or a default if not found.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+        - "{{ ansible_distribution }}.yml"
+        - "{{ ansible_os_family }}.yml"
+        - "default.yml"
+      paths:
+        - 'vars'
+
+- name: Install required packages
+  become: true
+  package:
+    state: present
+    name: "{{ item }}"
+  with_items: "{{ packages }}"
+  register: task_result
+  until: task_result is success
+  retries: 5
+
+- name: Create Fluent group
+  become: true
+  group:
+    name: "{{ fluent_os_user }}"
+    state: present
+
+- name: Create Fluent user
+  become: true
+  user:
+    name: "{{ fluent_os_user }}"
+    group: "{{ fluent_os_group }}"
+
+- name: Create required directories
+  become: true
+  file:
+    path: "{{ item.dest }}"
+    state: directory
+    recurse: yes
+    owner: "{{ fluent_os_user }}"
+    group: "{{ fluent_os_group }}"
+    mode: "{{ item.mode | default(omit) }}"
+  loop:
+    - {dest: "/etc/fluentd"}
+
+- name: Write Fluentd config files
+  become: true
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ fluent_os_user }}"
+    group: "{{ fluent_os_group }}"
+    mode: 0660
+  loop:
+    - {src: "env.j2", dest: "/etc/fluentd/env"}
+    - {src: "fluent.conf.j2", dest: "/etc/fluentd/fluent.conf"}
+  notify:
+    - restart fluentd
+
+- name: Write Fluentd Systemd unit file
+  become: true
+  template:
+    src: "fluentd.service.j2"
+    dest: "{{ fluentd_systemd_unit_path }}"
+  notify:
+    - restart fluentd
+
+- name: Recursively add read rights for Journal 
+  become: true
+  file:
+    path: /var/log/journal/
+    state: directory
+    recurse: yes
+    mode: a+r

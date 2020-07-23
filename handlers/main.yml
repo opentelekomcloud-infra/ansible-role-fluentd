@@ -1,0 +1,11 @@
+---
+# handlers file for fluentd
+
+- name: restart fluentd
+  become: true
+  systemd:
+    name: "{{ fluentd_systemd_service_name }}"
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+

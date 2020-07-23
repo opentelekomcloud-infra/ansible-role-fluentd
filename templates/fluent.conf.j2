@@ -1,0 +1,52 @@
+<source>
+  @type systemd
+  tag systemd
+  path /var/log/journal
+
+  <storage>
+    @type local
+    path /fluentd/log/fluentd-journald-systemd-cursor.json
+  </storage>
+
+  <entry>
+    fields_strip_underscores true
+    fields_lowercase true
+  </entry>
+</source>
+
+<match systemd>
+  @type copy
+  <store>
+    @type elasticsearch
+    host {{ fluent_elasticsearch_host }}
+    port {{ fluent_elasticsearch_port }}
+    user {{ fluent_elasticsearch_user }}
+    password {{ fluent_elasticsearch_password }}
+    scheme https
+    ssl_verify false
+    logstash_format     true
+    logstash_prefix     fluentd
+    logstash_dateformat %Y%m%d
+    reload_connections false
+    reconnect_on_error true
+    reload_on_failure true
+    request_timeout 60s
+    suppress_type_name true
+    <buffer>
+      flush_mode            interval
+      flush_interval        1s
+      retry_type            exponential_backoff
+      flush_thread_count    2
+      retry_forever         true
+      retry_max_interval    30
+      chunk_limit_size      2M
+      queue_limit_length    8
+      overflow_action       block
+    </buffer>
+  </store>
+</match>
+
+<system>
+  root_dir /fluentd/log/
+</system>
+
