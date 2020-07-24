@@ -26,14 +26,14 @@
 - name: Create Fluent group
   become: true
   group:
-    name: "{{ fluent_os_user }}"
+    name: "{{ fluentd_os_user }}"
     state: present
 
 - name: Create Fluent user
   become: true
   user:
-    name: "{{ fluent_os_user }}"
-    group: "{{ fluent_os_group }}"
+    name: "{{ fluentd_os_user }}"
+    group: "{{ fluentd_os_group }}"
 
 - name: Create required directories
   become: true
@@ -41,8 +41,8 @@
     path: "{{ item.dest }}"
     state: directory
     recurse: yes
-    owner: "{{ fluent_os_user }}"
-    group: "{{ fluent_os_group }}"
+    owner: "{{ fluentd_os_user }}"
+    group: "{{ fluentd_os_group }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {dest: "/etc/fluentd"}
@@ -71,12 +71,12 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    owner: "{{ fluent_os_user }}"
-    group: "{{ fluent_os_group }}"
+    owner: "{{ fluentd_os_user }}"
+    group: "{{ fluentd_os_group }}"
     mode: 0660
   loop:
     - {src: "env.j2", dest: "/etc/fluentd/env"}
-    - {src: "fluent.conf.j2", dest: "/etc/fluentd/fluent.conf"}
+    - {src: "fluentd.conf.j2", dest: "/etc/fluentd/fluentd.conf"}
   notify:
     - restart fluentd
 

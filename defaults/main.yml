@@ -3,11 +3,11 @@
 fluentd_systemd_service_name: "fluentd.service"
 fluentd_systemd_unit_path: "{{ '/etc/systemd/system/' + fluentd_systemd_service_name }}"
 
-fluent_os_user: fluent
-fluent_os_group: fluent
-fluent_elasticsearch_host: localhost
-fluent_elasticsearch_port: 9200
-fluent_elasticsearch_user: nobody
-fluent_elasticsearch_password: foobar
+fluentd_os_user: fluentd
+fluentd_os_group: fluentd
+fluentd_elasticsearch_host: localhost
+fluentd_elasticsearch_port: 9200
+fluentd_elasticsearch_user: nobody
+fluentd_elasticsearch_password: foobar
 
 
