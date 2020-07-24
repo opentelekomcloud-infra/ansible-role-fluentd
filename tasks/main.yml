@@ -47,6 +47,25 @@
   loop:
     - {dest: "/etc/fluentd"}
 
+- name: Recursively add read rights for Journal 
+  become: true
+  file:
+    path: /var/log/journal/
+    state: directory
+    recurse: yes
+    mode: a+r
+
+- name: Create config file for Journal in tmpfiles.d
+  become: true
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - {src: "systemd.conf.j2", dest: "/etc/tmpfiles.d/systemd.conf"}
+
 - name: Write Fluentd config files
   become: true
   template:
@@ -69,10 +88,3 @@
   notify:
     - restart fluentd
 
-- name: Recursively add read rights for Journal 
-  become: true
-  file:
-    path: /var/log/journal/
-    state: directory
-    recurse: yes
-    mode: a+r
