@@ -23,13 +23,13 @@
   until: task_result is success
   retries: 5
 
-- name: Create Fluent group
+- name: Create Fluentd group
   become: true
   group:
     name: "{{ fluentd_os_user }}"
     state: present
 
-- name: Create Fluent user
+- name: Create Fluentd user
   become: true
   user:
     name: "{{ fluentd_os_user }}"
