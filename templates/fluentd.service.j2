@@ -6,8 +6,8 @@ Wants=syslog.service
 Type=simple
 Restart=always
 TimeoutSec=30s
-User=fluent
-Group=fluent
+User=fluentd
+Group=fluentd
 Environment=FLUENTD_IMAGE=otcinfra/fluentd
 EnvironmentFile=/etc/fluentd/env
 
