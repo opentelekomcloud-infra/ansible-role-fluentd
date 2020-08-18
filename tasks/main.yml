@@ -47,24 +47,28 @@
   loop:
     - {dest: "/etc/fluentd"}
 
-- name: Recursively add read rights for Journal 
+- name: Copy systemd.conf tmpfiles to /etc to override journal permission settings
   become: true
-  file:
-    path: /var/log/journal/
-    state: directory
-    recurse: yes
-    mode: a+r
-
-- name: Create config file for Journal in tmpfiles.d
-  become: true
-  template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+  copy:
+    src: /lib/tmpfiles.d/systemd.conf
+    dest: /etc/tmpfiles.d/systemd.conf
     owner: root
     group: root
     mode: 0644
+
+- name: Change permisson on journal files to give read permissions
+  become: true
+  lineinfile:
+    path: /etc/tmpfiles.d/systemd.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
   loop:
-    - {src: "systemd.conf.j2", dest: "/etc/tmpfiles.d/systemd.conf"}
+    - {regexp: '^z /var/log/journal/%m/system.journal', line: 'z /var/log/journal/%m/system.journal 0644 root systemd-journal - -' }
+    - {regexp: '^z /var/log/journal/%m/\*.journal\*', line: 'z /var/log/journal/%m/*.journal* 0644 root systemd-journal - -' }
+
+- name: Reread tmpfiles configs an create all files with proper permissiong
+  become: true
+  command: /usr/bin/systemd-tmpfiles --create
 
 - name: Write Fluentd config files
   become: true
