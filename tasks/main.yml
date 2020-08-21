@@ -23,60 +23,25 @@
   until: task_result is success
   retries: 5
 
-- name: Create Fluentd group
-  become: true
-  group:
-    name: "{{ fluentd_os_user }}"
-    state: present
-
-- name: Create Fluentd user
-  become: true
-  user:
-    name: "{{ fluentd_os_user }}"
-    group: "{{ fluentd_os_group }}"
-
 - name: Create required directories
   become: true
   file:
     path: "{{ item.dest }}"
     state: directory
     recurse: yes
-    owner: "{{ fluentd_os_user }}"
-    group: "{{ fluentd_os_group }}"
+    owner: root
+    group: root
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {dest: "/etc/fluentd"}
-
-- name: Copy systemd.conf tmpfiles to /etc to override journal permission settings
-  become: true
-  copy:
-    src: /lib/tmpfiles.d/systemd.conf
-    dest: /etc/tmpfiles.d/systemd.conf
-    owner: root
-    group: root
-    mode: 0644
-
-- name: Change permisson on journal files to give read permissions
-  become: true
-  lineinfile:
-    path: /etc/tmpfiles.d/systemd.conf
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-  loop:
-    - {regexp: '^z /var/log/journal/%m/system.journal', line: 'z /var/log/journal/%m/system.journal 0644 root systemd-journal - -' }
-    - {regexp: '^z /var/log/journal/%m/\*.journal\*', line: 'z /var/log/journal/%m/*.journal* 0644 root systemd-journal - -' }
-
-- name: Reread tmpfiles configs an create all files with proper permissiong
-  become: true
-  command: /usr/bin/systemd-tmpfiles --create
 
 - name: Write Fluentd config files
   become: true
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    owner: "{{ fluentd_os_user }}"
-    group: "{{ fluentd_os_group }}"
+    owner: root
+    group: root
     mode: 0660
   loop:
     - {src: "env.j2", dest: "/etc/fluentd/env"}
