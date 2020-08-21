@@ -18,10 +18,10 @@
   @type copy
   <store>
     @type elasticsearch
-    host {{ fluent_elasticsearch_host }}
-    port {{ fluent_elasticsearch_port }}
-    user {{ fluent_elasticsearch_user }}
-    password {{ fluent_elasticsearch_password }}
+    host {{ fluentd_elasticsearch_host }}
+    port {{ fluentd_elasticsearch_port }}
+    user {{ fluentd_elasticsearch_user }}
+    password {{ fluentd_elasticsearch_password }}
     scheme https
     ssl_verify false
     logstash_format     true
