@@ -18,8 +18,8 @@ ExecStartPre=-/usr/bin/podman pull ${FLUENTD_IMAGE}
 ExecStart=/bin/sh -c "/usr/bin/podman run \
   --name fluentd \
   --env-file /etc/fluentd/env \
-  -v /etc/fluentd/fluentd.conf:/fluentd/etc/fluentd.conf:ro,Z \
-  -v /var/log/journal:/var/log/journal:ro,Z \
+  -v /etc/fluentd/fluentd.conf:/fluentd/etc/fluentd.conf:ro,z \
+  -v /var/log/journal:/var/log/journal:ro,z \
   ${FLUENTD_IMAGE}"
 
 ExecReload=-/usr/bin/podman stop -t 300 "fluentd"
