@@ -23,7 +23,7 @@
     user {{ fluentd_elasticsearch_user }}
     password {{ fluentd_elasticsearch_password }}
     scheme https
-    ssl_verify false
+    ssl_verify true
     logstash_format     true
     logstash_prefix     fluentd
     logstash_dateformat %Y%m%d
